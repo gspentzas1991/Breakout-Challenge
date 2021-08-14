@@ -1,3 +1,4 @@
+using Assets.Scripts;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -22,6 +24,7 @@ public class MainManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        UpdateBestScoreText();
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -72,5 +75,34 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        //if the current score was higher than the highscore, save the current score
+        var highscore = DataManager.GetBestScore();
+        Debug.Log(highscore.Score);
+        Debug.Log(m_Points);
+        if (m_Points>highscore.Score)
+        {
+            SaveBestScore();
+        }
+    }
+
+    /// <summary>
+    /// Saves the username and score of the best scorer
+    /// </summary>
+    private void SaveBestScore()
+    {
+        Debug.Log("trying to save score");
+        ScoreModel scoreModel = new ScoreModel();
+        scoreModel.Username = DataManager.GetCurrentUsername();
+        scoreModel.Score = m_Points;
+        DataManager.SaveBestScore(scoreModel);
+        UpdateBestScoreText();
+    }
+    /// <summary>
+    /// Updates the best score text 
+    /// </summary>
+    private void UpdateBestScoreText()
+    {
+        var highScoreData = DataManager.GetBestScore();
+        BestScoreText.text = $"Best Score : {highScoreData.Username} : {highScoreData.Score}";
     }
 }
